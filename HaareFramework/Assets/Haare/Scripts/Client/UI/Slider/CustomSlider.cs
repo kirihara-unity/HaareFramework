@@ -1,4 +1,5 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System.Threading;
+using Cysharp.Threading.Tasks;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,9 +19,9 @@ namespace Haare.Client.UI
         [SerializeField] private CustomImage fill;
         public float Value => _slider.value;
         
-        public override async UniTask Initialize()
+        public override async UniTask Initialize(CancellationToken cts)
         {
-            await base.Initialize();
+            await base.Initialize(cts);
             _slider = GetComponent<Slider>();
             Setup(0,1,0);
         }

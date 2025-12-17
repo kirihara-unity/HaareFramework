@@ -26,8 +26,10 @@ namespace Haare.Util.LogHelper
         }
 
         public static string TASK = $"<b><color=green>[TASK]</color></b>";
+        public static string CANCELLED = $"<b><color=yellow>[CTS]</color></b>";
         public static string FRAMEWORK = $"<b><color=cyan>[HAARE]</color></b>";
         public static string DEMO = "<b><color=gray>[DEMO]</color></b>";
         public static string ASSETLOADER = "<b><color=gray>[ASSETLOADER]</color></b>";
+        public static string DATAMANAGER = "<b><color=gray>[DATAMANAGER]</color></b>";
     }
 }

@@ -6,6 +6,7 @@ using VContainer;
 using VContainer.Unity;
 
 using Haare.Client.Routine.Service.SceneService;
+using Haare.Scripts.Client.Data;
 using Haare.Util.LogHelper;
 
 
@@ -14,15 +15,16 @@ namespace Haare.Client.Core.DI
     public class GamePresenter : IPostInitializable, IDisposable
     {
         [Inject]
-        private SceneRoutine _SceneRoutine;
-        
+        private SceneService _sceneService;
+
+        [Inject] private DataManager _DataManager;
         public void Dispose()
         {
         }
 
         public void PostInitialize()
         {
-            _SceneRoutine.CurrentPhase.AsObservable()
+            _sceneService.CurrentPhase.AsObservable()
                 .Skip(1)
                 .Subscribe(_ =>
             {
@@ -33,7 +35,6 @@ namespace Haare.Client.Core.DI
                 LogHelper.Log(LogHelper.FRAMEWORK,"Ended Clean Scene");
             });
             LogHelper.Log(LogHelper.FRAMEWORK,"GamePresenter PostInitialize");
-            
             
         }
     }

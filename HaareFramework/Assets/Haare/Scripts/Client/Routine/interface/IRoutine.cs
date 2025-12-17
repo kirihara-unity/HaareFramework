@@ -15,10 +15,10 @@ namespace Haare.Client.Routine
         //Init?
         bool isInitialized	{ get; }
         
-        Func<UniTask> Oninitialize  { get; }
+        Func<CancellationToken,UniTask> Oninitialize  { get; }
         Func<UniTask> Onfinalize	{ get; }
         
-        UniTask Initialize();
+        UniTask Initialize(CancellationToken cts);
         UniTask Finalize();
     }
 }

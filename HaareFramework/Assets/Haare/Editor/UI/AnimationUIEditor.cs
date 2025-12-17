@@ -9,6 +9,8 @@ namespace Haare.Editor.UI
     {
         public override void OnInspectorGUI()
         {
+            serializedObject.Update();
+
             string[] propertiesToExclude = new string[] {
                 "hoverScale",
                 "clickPunchScale",
@@ -16,14 +18,16 @@ namespace Haare.Editor.UI
                 "clickDuration",
                 "OPTION_HOVERIMAGE",
                 "OPTION_ANIMATION",
+                "OPTION_HOVERALPHA",
+                "INTERACTIABLE",
                 "HOVERANIMATION",
                 "CLICKANIMATION"
             };
             DrawPropertiesExcluding(serializedObject, propertiesToExclude);
             
-            serializedObject.Update();
 
             SerializedProperty hoverImageProp = serializedObject.FindProperty("OPTION_HOVERIMAGE");
+            SerializedProperty hoverColorProp = serializedObject.FindProperty("OPTION_HOVERALPHA");
             SerializedProperty animationProp = serializedObject.FindProperty("OPTION_ANIMATION");
             
             SerializedProperty clickAnimationFlagProp = serializedObject.FindProperty("CLICKANIMATION");
@@ -35,16 +39,17 @@ namespace Haare.Editor.UI
             SerializedProperty hoverDurationProp = serializedObject.FindProperty("hoverDuration");
             
             // OPTION_ANIMATION bool 값이 true일 때만 아래 코드가 실행됩니다.
+            EditorGUILayout.PropertyField(hoverImageProp);
+            EditorGUILayout.PropertyField(hoverColorProp);
+            EditorGUILayout.PropertyField(animationProp);
+
+            // 헤더처럼 보이도록 라벨을 추가합니다.
+            EditorGUILayout.Space(); // 약간의 공백
             if (animationProp.boolValue)
             {
-                EditorGUILayout.PropertyField(hoverImageProp);
-                EditorGUILayout.PropertyField(animationProp);
-
-                // 헤더처럼 보이도록 라벨을 추가합니다.
-                EditorGUILayout.Space(); // 약간의 공백
                 EditorGUILayout.LabelField("Animation Options", EditorStyles.boldLabel);
-            
-                
+
+   
                 EditorGUILayout.PropertyField(clickAnimationFlagProp);
                 if (clickAnimationFlagProp.boolValue)
                 {
@@ -70,6 +75,8 @@ namespace Haare.Editor.UI
     {
         public override void OnInspectorGUI()
         {
+            serializedObject.Update();
+
             string[] propertiesToExclude = new string[] {
                 "OPTION_ANIMATION",
                 "ANIMATION_SLIDE",
@@ -83,7 +90,6 @@ namespace Haare.Editor.UI
             };
             DrawPropertiesExcluding(serializedObject, propertiesToExclude);
             
-            serializedObject.Update();
 
             SerializedProperty animationProp = serializedObject.FindProperty("OPTION_ANIMATION");
             SerializedProperty animationSlideProp = serializedObject.FindProperty("ANIMATION_SLIDE");

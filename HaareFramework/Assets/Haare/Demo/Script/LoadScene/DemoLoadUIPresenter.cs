@@ -23,7 +23,7 @@ namespace Demo.LoadScene
         [Inject]
         private readonly IObjectResolver _resolver;
         [Inject] 
-        public SceneRoutine sceneService;
+        public SceneService sceneService;
         [Inject]
         private DemoLoadMono _loadMono;
         public void Dispose()
@@ -38,7 +38,7 @@ namespace Demo.LoadScene
         public void PostInitialize()
         {
             disposables.Add(
-                _sceneUiManager.OnOpenedNewPannel.AsObservable()
+                _sceneUiManager.OnLoadedPanel.AsObservable()
                 .Select(panel => panel.ConvertTo(typeof(LoadingPanel)) as LoadingPanel)
                 .Where(loadingpanel => loadingpanel != null) 
                 .Subscribe(panel =>
@@ -47,6 +47,7 @@ namespace Demo.LoadScene
                     {
                         panel.LoadingSlider.SetValue(value);
                     });
+                    panel.OpenPanel();
                     LoadStartSequence().Forget();
                     sceneService.LoadScene();
                 }));
@@ -60,9 +61,8 @@ namespace Demo.LoadScene
 
         private async UniTask LoadStartSequence()
         {
-            _coreUIManager.ClosePanel<LoadingFadePanel>();
-            var fadepanelID = await _coreUIManager.OpenPanel<LoadingFadePanel>();
-            var panel = _coreUIManager.RentPanel<LoadingFadePanel>(fadepanelID);
+            var panel = _coreUIManager.RentPanel<LoadingFadePanel>();
+            panel.OpenPanel();
             await panel.FadeOut();
             _coreUIManager.ClosePanel<LoadingFadePanel>();
         }

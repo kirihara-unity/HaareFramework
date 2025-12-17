@@ -1,3 +1,4 @@
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Haare.Client.Routine;
 using Haare.Util.LogHelper;
@@ -10,9 +11,9 @@ namespace Demo.Service
     {
         public override bool isInSceneOnly => true;
 
-        public override async UniTask Initialize()
+        public override async UniTask Initialize(CancellationToken cts)
         {
-            await base.Initialize();
+            await base.Initialize(cts);
             LogHelper.LogTask(LogHelper.DEMO,"DemoNativeInit");
             await UniTask.CompletedTask;
         }

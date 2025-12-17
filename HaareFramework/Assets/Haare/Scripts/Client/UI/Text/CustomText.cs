@@ -1,6 +1,7 @@
 ﻿using TMPro;
 
 using Haare.Client.Routine;
+using UnityEngine;
 
 namespace Haare.Client.UI
 {
@@ -8,9 +9,18 @@ namespace Haare.Client.UI
     {
         public TMP_Text _Text;
         
-        public void ChangeText(string value)
+        protected override void Constructor()
+        {
+            base.Constructor();
+            _Text = GetComponent<TMP_Text>();
+        }
+        public void SetupText(string value)
         {
             _Text.text = value;
+        }
+        public void SetupTextColor(Color32 color)
+        {
+            _Text.color = color;
         }
     }
 }

@@ -13,11 +13,15 @@ namespace Haare.Client.Routine
 {
     public class NativeRoutine : INativeRoutine , IDisposable
     {
+        private Func<CancellationToken, UniTask> _oninitialize;
+
         public CancellationTokenSource _cts { get; private set; }
             = new CancellationTokenSource();
         public virtual bool isRegistered => true;
         public virtual bool isInSceneOnly { get; protected set; }
         public bool isInitialized { get; private set; }
+
+        Func<CancellationToken, UniTask> IRoutine.Oninitialize => _oninitialize;
 
         public Func<UniTask> Oninitialize { get; protected set;} = async () => await UniTask.CompletedTask;
         public Func<UniTask> Onfinalize { get; protected set;} = async () => await UniTask.CompletedTask;
@@ -31,10 +35,10 @@ namespace Haare.Client.Routine
 
             try
             {
-                LogHelper.LogTask(LogHelper.FRAMEWORK, "Custruct of Native Routine");
+                //LogHelper.LogTask(LogHelper.FRAMEWORK, "Custruct of Native Routine");
                 await UniTask.Delay(1, cancellationToken: cts);
                 await UniTask.WaitUntil(() => Processer.Instance.isInitialized, cancellationToken: cts);
-                await Processer.Instance.Register(this);
+                await Processer.Instance.Register(this,cts);
             }
             catch (OperationCanceledException)
             {
@@ -45,13 +49,14 @@ namespace Haare.Client.Routine
                 LogHelper.Error(LogHelper.FRAMEWORK, $"An error occurred during {this.GetType()} initialization: {ex}");
             }
         }
-
         
-        public virtual async UniTask Initialize()
+        public virtual async UniTask Initialize(CancellationToken cts)
         {
             await Oninitialize();
             isInitialized = true;
         }
+
+        
         public virtual void UpdateProcess() {
 
         }
@@ -60,7 +65,7 @@ namespace Haare.Client.Routine
         {
             Finalize().Forget();
         }
-
+        
         public virtual async UniTask Finalize()
         {
             await Onfinalize();

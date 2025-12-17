@@ -17,9 +17,9 @@ namespace Haare.Client.Routine
         public CancellationTokenSource _cts { get; private set; }
         
         public virtual bool isRegistered => true;
-        public virtual bool isInSceneOnly { get; protected set; }
+        public virtual bool isInSceneOnly { get; protected set; } = true;
         public bool isInitialized { get; private set; }
-        public Func<UniTask> Oninitialize { get; protected set; } = async () => await UniTask.CompletedTask;
+        public Func<CancellationToken,UniTask> Oninitialize { get; protected set; } = async (cts) => await UniTask.CompletedTask;
         public Func<UniTask> Onfinalize { get; protected set;} = async () => await UniTask.CompletedTask;
         public Subject<Unit> Onupdate { get; protected set; } = new Subject<Unit>();
         public Subject<Unit> OnLateupdate { get; protected set; } = new Subject<Unit>();
@@ -45,9 +45,9 @@ namespace Haare.Client.Routine
 
                 await UniTask.WaitUntil(
                     () => Processer.Instance.isInitialized
-                    , cancellationToken: cts);
+                    , cancellationToken : cts);
 
-                await Processer.Instance.Register(this);
+                await Processer.Instance.Register(this,cts);
 
                 disposables.Add(Processer.Instance.PROCESSING.Subscribe(_ =>
                 {
@@ -66,9 +66,10 @@ namespace Haare.Client.Routine
                 disposables.Add(Processer.Instance.OnLateupdate.Subscribe(_ => { LateUpdateProcess(); }));
                 disposables.Add(Processer.Instance.OnFixedupdate.Subscribe(_ => { FixedUpdateProcess(); }));
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException exception)
             {
-                LogHelper.Log(LogHelper.FRAMEWORK, $"{this.GetType()} initialization was canceled.");
+                LogHelper.Log(LogHelper.CANCELLED, 
+                    $"{this.GetType()} initialization was canceled. by {exception}");
             }
             catch (Exception ex)
             {
@@ -80,9 +81,9 @@ namespace Haare.Client.Routine
         protected virtual void Constructor() {
             
         }
-        public virtual async UniTask Initialize()
+        public virtual async UniTask Initialize(CancellationToken cts)
         {
-            await Oninitialize();
+            await Oninitialize(cts);
             isInitialized = true;
         }
         protected virtual void OnStopProcess()
@@ -109,7 +110,7 @@ namespace Haare.Client.Routine
             _isFinalized = true;
             disposables.Clear();
             await Onfinalize();
-            LogHelper.LogTask(LogHelper.FRAMEWORK,this.GetType()+" Disposed");
+            //LogHelper.LogTask(LogHelper.FRAMEWORK,this.GetType()+"MonoRoutine Disposed");
         }
         private void OnApplicationQuit()
         {
@@ -123,7 +124,7 @@ namespace Haare.Client.Routine
             {
                 Processer.Instance.UnRegister(this);
             }
-            LogHelper.Log(LogHelper.FRAMEWORK,this.GetType()+" Distroyed");
+            //LogHelper.Log(LogHelper.FRAMEWORK,this.GetType()+" Distroyed");
         }
 
  

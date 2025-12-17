@@ -23,7 +23,7 @@ namespace Demo.LobbyScene
         [Inject]
         private readonly IObjectResolver _resolver;
         [Inject] 
-        public SceneRoutine sceneService;
+        public SceneService sceneService;
    
         public void Dispose()
         {
@@ -35,7 +35,7 @@ namespace Demo.LobbyScene
 
         public void PostInitialize()
         {
-            StartSequence();
+            //StartSequence();
         }
         
         private void BindIPanel(ICustomPanel panel)
@@ -47,7 +47,7 @@ namespace Demo.LobbyScene
         private async UniTask StartSequence()
         {
             _coreUIManager.ClosePanel<LoadingFadePanel>();
-            var fadepanelID = await _coreUIManager.OpenPanel<LoadingFadePanel>();
+            var fadepanelID = await _coreUIManager.LoadPanel<LoadingFadePanel>();
             var panel = _coreUIManager.RentPanel<LoadingFadePanel>(fadepanelID);
             await panel.FadeOut();
             _coreUIManager.ClosePanel<LoadingFadePanel>();

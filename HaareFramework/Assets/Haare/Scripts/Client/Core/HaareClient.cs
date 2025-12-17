@@ -8,7 +8,6 @@ using Haare.Client.Core;
 using Haare.Client.Core.Singleton;
 using Haare.Client.UI;
 using Haare.Util.LogHelper;
-using Haare.Util.Prefab;
 
 public class HaareClient
 {

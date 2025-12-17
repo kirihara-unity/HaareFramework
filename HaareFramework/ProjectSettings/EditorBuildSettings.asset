@@ -4,6 +4,9 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 0
+    path: Assets/Haare/Demo/Scene/DemoTitleScene.unity
+    guid: 2006f528c48ae9341b4c801ac58937b3
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: b496864618638f044a54dd140d4e5ec3, type: 2}

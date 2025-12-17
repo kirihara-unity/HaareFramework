@@ -98,7 +98,7 @@ namespace Haare.Scripts.Client.UI.Animator
 
     #region Popup
 
-    
+       
     public void OpenPopup(float duration,Ease easeType)
     {
         panelRectTransform.localScale = Vector3.one * 0.8f;

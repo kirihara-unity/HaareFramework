@@ -352,10 +352,14 @@ MonoBehaviour:
   HoveredSprite: {fileID: 0}
   ClickedSprite: {fileID: 0}
   OPTION_ANIMATION: 0
+  ANIMATION_SLIDE: 0
   slideDuration: 0.5
-  easeType: 6
+  slideEaseType: 6
   onScreenPosition: {fileID: 0}
   offScreenPosition: {fileID: 0}
+  ANIMATION_POPUP: 0
+  popupDuration: 0.2
+  popupEaseType: 1
 --- !u!1 &1686478102852361789
 GameObject:
   m_ObjectHideFlags: 0
@@ -619,10 +623,14 @@ MonoBehaviour:
   HoveredSprite: {fileID: 0}
   ClickedSprite: {fileID: 0}
   OPTION_ANIMATION: 0
+  ANIMATION_SLIDE: 0
   slideDuration: 0.5
-  easeType: 6
+  slideEaseType: 6
   onScreenPosition: {fileID: 0}
   offScreenPosition: {fileID: 0}
+  ANIMATION_POPUP: 0
+  popupDuration: 0.2
+  popupEaseType: 1
 --- !u!1 &1686478103749407552
 GameObject:
   m_ObjectHideFlags: 0
@@ -791,11 +799,11 @@ RectTransform:
   m_Father: {fileID: 1686478102923349188}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 510, y: 424}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -296}
   m_SizeDelta: {x: 900, y: 120}
-  m_Pivot: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &929259644728508986
 CanvasRenderer:
   m_ObjectHideFlags: 0

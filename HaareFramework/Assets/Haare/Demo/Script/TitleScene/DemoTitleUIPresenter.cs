@@ -23,7 +23,7 @@ namespace Demo.TitleScene
         [Inject]
         private readonly IObjectResolver _resolver;
         [Inject] 
-        public SceneRoutine sceneService;
+        public SceneService sceneService;
 
         public void Dispose()
         {
@@ -38,7 +38,7 @@ namespace Demo.TitleScene
         {
             
             disposables.Add(
-                _sceneUiManager.OnOpenedNewPannel.AsObservable()
+                _sceneUiManager.OnLoadedPanel.AsObservable()
                 .Select(panel => panel.ConvertTo(typeof(TitlePanel)) as TitlePanel)
                 .Where(fadepanel => fadepanel != null) 
                 .Subscribe(panel =>
@@ -47,6 +47,7 @@ namespace Demo.TitleScene
                     {
                         StartGameSequence().Forget();
                     });
+                    panel.OpenPanel();
                 }));
 
             
@@ -54,9 +55,9 @@ namespace Demo.TitleScene
 
         private async UniTask StartGameSequence()
         {
-            var loadingPanelID = await _coreUIManager.OpenPanel<LoadingFadePanel>(false, true);
+            var loadingPanelID = await _coreUIManager.LoadPanel<LoadingFadePanel>(null,false, true);
             var loadingPanel = _coreUIManager.RentPanel<LoadingFadePanel>(loadingPanelID);
-    
+            loadingPanel.OpenPanel();
             await loadingPanel.FadeIn();
 
             OnFinishedFadePanel(); 

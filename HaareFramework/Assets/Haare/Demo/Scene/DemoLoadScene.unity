@@ -289,6 +289,7 @@ GameObject:
   - component: {fileID: 1629324120}
   - component: {fileID: 1629324119}
   - component: {fileID: 1629324118}
+  - component: {fileID: 1629324121}
   m_Layer: 5
   m_Name: Demo_Background
   m_TagString: Untagged
@@ -379,6 +380,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1629324116}
   m_CullTransparentMesh: 1
+--- !u!114 &1629324121
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1629324116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ShowMaskGraphic: 1
 --- !u!1 &1913829482
 GameObject:
   m_ObjectHideFlags: 0
@@ -428,12 +442,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -491,10 +505,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1913829482}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3f77389e08702914baab02601879a183, type: 3}
+  m_Script: {fileID: 11500000, guid: 053539038a8f4e6cb0f35719a399669f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ILoadedScene: 0
+  safePannelRect: {fileID: 1629324117}
 --- !u!1 &2144466757
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,3 +1,4 @@
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Haare.Client.Routine;
 using Haare.Scripts.Client.UI.Animator;
@@ -34,6 +35,9 @@ namespace Haare.Client.UI
         [SerializeField] private float popupDuration = 0.2f;
         [SerializeField] private Ease popupEaseType = Ease.Linear;
 
+        [SerializeField] private Color _hoverColor = new Color(0.85f, 0.85f, 0.85f, 1f);
+        [SerializeField] private Color _pressedColor = new Color(0.85f, 0.85f, 0.85f, 1f);
+        private Color _originalColor;
         
         private UIAnimator _animator;
 
@@ -62,6 +66,13 @@ namespace Haare.Client.UI
             }
         }
 
+        public override async UniTask Initialize(CancellationToken cts)
+        {
+            await base.Initialize(cts);
+            SetupImage();
+        }
+
+        
         public void ClearSlidePosition()
         {
             if(_animator!=null)
@@ -82,16 +93,19 @@ namespace Haare.Client.UI
             if(_animator!=null)
                 _animator.ClosePopup(popupDuration,popupEaseType);
         }
-        public override async UniTask Initialize()
-        {
-            await base.Initialize();
-            SetupImage();
-        }
-
+        
+        
+        
+        
         private void SetupImage()
         {
             if(CommonSprite!=null)
                 _image.sprite = CommonSprite;
+            
+            if (_image != null)
+            {
+                _originalColor = _image.color;
+            }
         }
 
         public void ChangeRGB(int r, int g, int b)
@@ -112,9 +126,25 @@ namespace Haare.Client.UI
             }
             ChangeAlpha(targetAlpha);
         }
+
+
+        public void ChangeHoverColor()
+        {
+            _image.color = _originalColor * _hoverColor;
+        }
+
+        public void ChangeClickedColor()
+        {
+            _image.color = _originalColor * _pressedColor;
+        }
+        public void ChangeCommonColor()
+        {
+            _image.color = _originalColor;
+        }
+        
         public void ChangeAlpha(float alpha)
         {
-            _image.color = new Color(255, 255, 255, alpha);
+            _image.color = new Color(_image.color.r, _image.color.g, _image.color.b, alpha);
         }
         
         public void ChangeCommonImage()
