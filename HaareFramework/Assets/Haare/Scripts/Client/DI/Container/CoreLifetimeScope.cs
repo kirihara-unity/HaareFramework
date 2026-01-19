@@ -5,7 +5,7 @@ using VContainer.Unity;
 using Haare.Client.Routine.Service.SceneService;
 using Haare.Client.UI;
 using Haare.Scripts.Client.Data;
-using Haare.Util.LogHelper;
+using Haare.Util.Logger;
 using UnityEngine;
 
 namespace Haare.Client.Core.DI
@@ -15,6 +15,8 @@ namespace Haare.Client.Core.DI
         [SerializeField]
         private CoreUIManager _coreUIManagerPrefab;
         
+
+        private bool isLocalMode = true;
         protected override void Configure(IContainerBuilder builder)
         {
             builder.Register<DataManager>(Lifetime.Singleton).As<DataManager>().AsSelf();
@@ -26,7 +28,7 @@ namespace Haare.Client.Core.DI
             
             
             builder.RegisterEntryPoint<GamePresenter>();
-            LogHelper.Log(LogHelper.FRAMEWORK,"GameProcesserScope start");
+            LogHelper.Log(LogHelper.FRAMEWORK,"GameProcessorScope start");
         }
     }
 }

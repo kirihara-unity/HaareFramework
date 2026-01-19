@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
+using Haare.Util.Logger;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -25,7 +26,7 @@ namespace Haare.Util.Prefab
                 // 3. 컴포넌트를 찾지 못했을 경우
                 if (instance != null)
                 {
-                    LogHelper.LogHelper.Warning(LogHelper.LogHelper.ASSETLOADER,$"생성된 프리팹 '{instance.name}'에서 '{typeof(T).Name}' 컴포넌트를 찾을 수 없습니다.");
+                    LogHelper.Warning(LogHelper.ASSETLOADER,$"생성된 프리팹 '{instance.name}'에서 '{typeof(T).Name}' 컴포넌트를 찾을 수 없습니다.");
                 }
                 
                 return null;
@@ -33,7 +34,7 @@ namespace Haare.Util.Prefab
             catch (System.Exception e)
             {
                 // 4. 주소가 잘못되었거나 로딩 중 예외 발생 시 오류 처리
-                LogHelper.LogHelper.Error(LogHelper.LogHelper.ASSETLOADER,$"에셋 인스턴스화 실패! 주소: {param.PrefabPath}\n오류: {e.Message}");
+                LogHelper.Error(LogHelper.ASSETLOADER,$"에셋 인스턴스화 실패! 주소: {param.PrefabPath}\n오류: {e.Message}");
                 return null;
             }
         }

@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Cysharp.Threading.Tasks;
-
 using Haare.Client.Routine;
 using Haare.Util.Loader;
-using Haare.Util.LogHelper;
+using Haare.Util.Logger;
 using UnityEngine;
+using VContainer;
 
 namespace Haare.Scripts.Client.Data
 {
@@ -18,12 +18,12 @@ namespace Haare.Scripts.Client.Data
 
         public void Register<T>(T data) where T : IDataModel
         {
-            LogHelper.Log(LogHelper.FRAMEWORK, $"Registering data for '{typeof(T).Name}'.");
+            LogHelper.Log(LogHelper.DATAMANAGER, $"Registering data for '{typeof(T).Name}'.");
             modelRegistry[typeof(T)] = data;
         }
 
         /// <summary>
-        /// 데이터를 가져옵니다.
+        /// Local 데이터를 가져옵니다.
         /// </summary>
         public async UniTask<T> GetModel<T>() where T : class, IDataModel
         {
@@ -38,7 +38,7 @@ namespace Haare.Scripts.Client.Data
 
                 LogHelper.Log(LogHelper.DATAMANAGER,
                     $"Cache miss for '{modelType.Name}'. Attempting to load...");
-
+                
                 var sourceAttribute = modelType.GetCustomAttribute<DataModelAttribute>();
                 if (sourceAttribute == null)
                 {
@@ -46,18 +46,35 @@ namespace Haare.Scripts.Client.Data
                         $"Model type '{modelType.Name}' has no [DataModelSource] attribute.");
                     return default;
                 }
-
                 Type targetDataType = sourceAttribute.dataType;
                 string address = sourceAttribute.JsonDataPath;
-                var loadedAsset =
-                    await AssetLoader.LoadAsset<TextAsset>(address);
-
+                
+               
+                TextAsset loadedAsset;
+                if (AssetLoader.Exists(address))
+                {
+                    // Load With File. JsonLoad
+                    var loadedLocalJsonAsset = await AssetLoader.LoadJsonAsync(address);
+                    loadedAsset = loadedLocalJsonAsset;
+                }
+                else
+                {
+                    address = sourceAttribute.AddressableJsonDataPath;
+                    // Load With Addressable JSON Template Data (Template)
+                    var loadedTemplateJsonAsset =
+                        await AssetLoader.LoadAsset<TextAsset>(address);
+                    loadedAsset = loadedTemplateJsonAsset;
+                }
+                
+                // Load With Addressable JSON Data (Template) -> Finish
+                
                 if (loadedAsset == null)
                 {
                     LogHelper.Error(LogHelper.DATAMANAGER,
                         $"Failed to load template asset from address: {address}");
                     return default;
                 }
+                
                 var deserializedObject =
                     JsonUtil.JsonUtilityGeneric.FromJson(loadedAsset.text,targetDataType);
                 
@@ -65,8 +82,6 @@ namespace Haare.Scripts.Client.Data
                 try
                 {
                     //Debug.Log($"Loaded Asset Full Type: {loadedAsset.GetType().FullName}");
-
-                    
                     var constructor = modelType.GetConstructor(new Type[] { deserializedObject.GetType() });
                     if (constructor != null)
                     {
@@ -96,18 +111,30 @@ namespace Haare.Scripts.Client.Data
                 }
 
                 Register(newModel);
+                
+                if (!AssetLoader.Exists(address))
+                {
+                    address = sourceAttribute.JsonDataPath;
+                    await AssetLoader.SaveJson(address,deserializedObject);
+                }
                 return newModel;
             }
             catch (Exception e)
             {
                 LogHelper.Error(LogHelper.DATAMANAGER,
                     $"Failed to Get<>.\nError: {e.Message}");
-                return default;
+                throw;
             }
         }
         
-        
-        
-        
+        // 통합 저장 함수
+        public async UniTask SaveData<TW,T>(IDataModel model,IData data)  where TW : IDataModel where T : IData
+        {
+            var modelType = typeof(TW);
+            var sourceAttribute = modelType.GetCustomAttribute<DataModelAttribute>();
+            string address = sourceAttribute.JsonDataPath; 
+            await AssetLoader.SaveJson(address,data);
+            LogHelper.Log(LogHelper.DATAMANAGER, "데이터 저장 완료.");
+        }
     }
 }

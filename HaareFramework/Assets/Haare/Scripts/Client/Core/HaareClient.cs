@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 using Haare.Client.Core;
 using Haare.Client.Core.Singleton;
 using Haare.Client.UI;
-using Haare.Util.LogHelper;
+using Haare.Util.Logger;
 
 public class HaareClient
 {
@@ -16,9 +16,9 @@ public class HaareClient
         
         LogHelper.Log(LogHelper.FRAMEWORK,"Start Haare Framework");
         await Task.Delay( 1 );
-        await Processer.WaitForCreation();
+        await Processor.WaitForCreation();
         
-        await Processer.Instance.Constructor(InitializePlugin, RegisterProcesses);
+        await Processor.Instance.Constructor(InitializePlugin, RegisterProcesses);
         
     }
 

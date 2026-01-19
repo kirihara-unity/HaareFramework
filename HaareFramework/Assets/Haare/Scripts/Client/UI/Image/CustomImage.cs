@@ -108,9 +108,9 @@ namespace Haare.Client.UI
             }
         }
 
-        public void ChangeRGB(int r, int g, int b)
+        public void ChangeColor(Color b)
         {
-            _image.color = new Color(r, g, b);
+            _image.color = b;
         }
         
         public async UniTask Fade(float startAlpha,float targetAlpha, float duration)

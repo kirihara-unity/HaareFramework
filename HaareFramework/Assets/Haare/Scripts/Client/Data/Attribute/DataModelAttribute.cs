@@ -7,11 +7,13 @@ namespace Haare.Scripts.Client.Data
     public sealed class DataModelAttribute : Attribute
     {
         public Type dataType { get; }
+        public string AddressableJsonDataPath { get; }
         public string JsonDataPath { get; }
 
-        public DataModelAttribute(Type templateType, string jsonDataPath)
+        public DataModelAttribute(Type templateType, string addressableJsonDataPath, string jsonDataPath)
         {
             dataType = templateType;
+            AddressableJsonDataPath = addressableJsonDataPath;
             JsonDataPath = jsonDataPath;
         }
     }

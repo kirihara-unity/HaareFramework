@@ -7,9 +7,10 @@ using Cysharp.Threading.Tasks;
 using Haare.Client.Routine;
 using Haare.Client.Routine.Service.SceneService;
 using Haare.Util.Loader;
-using Haare.Util.LogHelper;
+using Haare.Util.Logger;
 using R3;
 using UnityEngine;
+using VContainer;
 
 namespace Haare.Client.UI
 {
@@ -32,6 +33,7 @@ namespace Haare.Client.UI
         public override UniTask Initialize(CancellationToken cts)
         {
             //ApplySafeArea();
+            LogHelper.Log(LogHelper.FRAMEWORK, "SceneUIManager Initialize");
             return base.Initialize(cts);
         }
 
@@ -102,10 +104,12 @@ namespace Haare.Client.UI
         /// <exception cref="Exception"></exception>
         private UniTask<T> Register<T>() where T : Component, ICustomPanel
         {
+            //LogHelper.Warning(LogHelper.FRAMEWORK, $"Panel Register Start {typeof(T)}");
             var pageTypeToRegister = typeof(T);
             var panel = pageTypeToRegister.GetCustomAttribute<PanelAttribute>();
             var component = AssetLoader.InstantiatePrefab<T>(
                 safePannelRect.transform, panel.AddressablePath);
+            //LogHelper.Warning(LogHelper.FRAMEWORK, $"Panel Register Finish {typeof(T)}");
             return component;
         }
 
@@ -115,7 +119,7 @@ namespace Haare.Client.UI
         /// <returns></returns>
         public ICustomPanel PeekPanel()
         {
-            if (TypePanelStack.Count == 0)
+            if (TypePanelStack.Count <= 1)
             {
                 return null;
             }
@@ -134,52 +138,108 @@ namespace Haare.Client.UI
         {
             var panel = await LoadPanel<T>(isOverlay, IsStack);
             
+               
             if (onCompletedTask != null)
             {
                 await onCompletedTask();
             }
+
+            
+            await panel.SetUpTask(
+                async () => await panel.SetData(),
+                        panel.BindEvent
+            );
+            
             
             OnLoadedPanel.OnNext(panel);
             
             return panel.GetInstanceID();
         }
-
+        /// <summary>
+        /// LoadPanel With Resolver
+        /// </summary>
+        /// <returns></returns>
+        public async UniTask<int> LoadPanel<T>(
+            IObjectResolver resolver, Func<UniTask> onCompletedTask = null, bool isOverlay = false, bool IsStack = true)
+            where T : Component, ICustomPanel 
+        {
+            var panel = await LoadPanel<T>(isOverlay, IsStack);
+            
+            resolver.Inject(panel);
+            
+            await panel.SetUpTask(
+                async ()=> await panel.SetData(),
+                panel.BindEvent
+            );
+            
+            if (onCompletedTask != null)
+            {
+                await onCompletedTask();
+            }
+            
+            
+            OnLoadedPanel.OnNext(panel);
+            
+            return panel.GetInstanceID();
+        }
         /// <summary>
         /// LoadPanel With PanelData
         /// </summary>
-        /// <param name="onCompletedTask"></param>
-        /// <param name="isOverlay"></param>
-        /// <param name="IsStack"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="U"></typeparam>
         /// <returns></returns>
         public async UniTask<int> LoadPanel<Ttype,Tdata>(
             Tdata panelData, Func<UniTask> onCompletedTask = null, bool isOverlay = false, bool IsStack = true)
             where Ttype : Component, ICustomPanel where Tdata : IPanelData
         {
             var panel = await LoadPanel<Ttype>(isOverlay, IsStack);
-
-            panel.BindEvent();
+            
             await panel.SetUpTask(
+                async ()=> await panel.SetData(),
                 async ()=> await panel.SetData(panelData),
-                async ()=> await panel.BindEvent(panelData)
+                async ()=> await panel.BindEvent(panelData),
+                panel.BindEvent
                 );
             
             if (onCompletedTask != null)
             {
                 await onCompletedTask();
             }
+            
             OnLoadedPanel.OnNext(panel);
             
             panel.OpenPanel();
+            
             return panel.GetInstanceID();
         }
-
+        public async UniTask<int> LoadPanel<Ttype,Tdata>(
+            IObjectResolver resolver, Tdata panelData, Func<UniTask> onCompletedTask = null, bool isOverlay = false, bool IsStack = true)
+            where Ttype : Component, ICustomPanel where Tdata : IPanelData
+        {
+            var panel = await LoadPanel<Ttype>(isOverlay, IsStack);
+            resolver.Inject(panel);
+            
+            await panel.SetUpTask(
+                async ()=> await panel.SetData(),
+        async ()=> await panel.SetData(panelData), 
+      async ()=> await panel.BindEvent(panelData),
+                panel.BindEvent
+            );
+            
+            if (onCompletedTask != null)
+            {
+                await onCompletedTask();
+            }
+            
+            OnLoadedPanel.OnNext(panel);
+            
+            panel.OpenPanel();
+            
+            return panel.GetInstanceID();
+        }
         private async UniTask<T> LoadPanel<T>(
             bool isOverlay = false, bool IsStack = true)  where T : Component, ICustomPanel
         {
+            //LogHelper.Warning(LogHelper.FRAMEWORK, $"LoadPanel Start {typeof(T)}");
             var pageType = typeof(T);
-
             // 1. 새 패널 가져오기 (없으면 생성)
             var panel = await Register<T>();
             int instanceID = panel.GetInstanceID();
@@ -192,6 +252,9 @@ namespace Haare.Client.UI
 
             if(IsStack)
                 TypePanelStack.Push(panelType);
+            //LogHelper.Warning(LogHelper.FRAMEWORK, $"LoadPanel Finished {typeof(T)}");
+            // LogHelper.Log("UI Stack Count"+TypePanelStack.Count);
+            // LogHelper.Log("UI DICT Count"+ PanelDic.Count);
             return panel;
         }
         
@@ -199,8 +262,21 @@ namespace Haare.Client.UI
         /// <summary>
         /// ClosePanel
         /// </summary>
-        public void ClosePanel<T>(bool isOverlay = false) where T : Component, ICustomPanel
+        public void ClosePanel<T>(bool corePanel = false) where T : Component, ICustomPanel
         { 
+            if (TypePanelStack.Count == 0) return;
+            var currentKey = TypePanelStack.Peek();
+    
+            // 현재 스택의 최상단이 내가 닫으려는 타입(T)인지 확인
+            if (currentKey.pageType == typeof(T)) 
+            {
+                ClosePeekPanel();
+            }
+            else
+            {
+                LogHelper.Warning($"닫으려는 패널 {typeof(T)}가 최상단에 없습니다. 현재 최상단: {currentKey.pageType}");
+            }
+            /*
             var panel = RentPanel<T>();
             if (panel == null)
             {
@@ -214,25 +290,13 @@ namespace Haare.Client.UI
             {
                 LogHelper.Log(LogHelper.FRAMEWORK,"Empty UI Panel");
             }
-            else
+            else if (!corePanel)
             {
                 PanelDic[TypePanelStack.Peek()].ReloadPanel();
                 OnReLoadedPanel.OnNext(PanelDic[TypePanelStack.Peek()]);
-                //LogHelper.Log("UI Stack Count"+TypePanelStack.Count);
             }
-            if (PanelDic.Count == 0)
-            {
-                LogHelper.Log(LogHelper.FRAMEWORK,"Empty UI Dic");
-            }
-            else
-            {
-                // foreach (var kv in PanelDic)
-                // {
-                //     LogHelper.Log(($"DICT : {kv.Key} : {kv.Value}"));
-                // }
-            }
-            
             Destroy(panel.panel);
+            */
         }
             
         /// <summary>
@@ -240,28 +304,39 @@ namespace Haare.Client.UI
         /// </summary>
         public void ClosePeekPanel()
         {
-            var panel = PeekPanel();
-            panel.ClosePanel();
-            TypePanelStack.Pop();
-            PanelDic.Remove(TypePanelStack.Peek()); 
-            
             if (TypePanelStack.Count == 0)
             {
-                LogHelper.Log(LogHelper.FRAMEWORK,"Empty UI Panel");
+                LogHelper.Log(LogHelper.FRAMEWORK, "Stack is Empty");
+                return;
             }
-            if (PanelDic.Count == 0)
+            var currentKey = TypePanelStack.Peek();
+            if (!PanelDic.ContainsKey(currentKey))
             {
-                LogHelper.Log(LogHelper.FRAMEWORK,"Empty UI Panel");
+                LogHelper.Error(LogHelper.FRAMEWORK, "Key not found in Dictionary but exists in Stack!");
+                TypePanelStack.Pop();
+                return;
             }
-            foreach (var item in TypePanelStack)
+            var panel = PanelDic[currentKey];
+            if (panel != null)
             {
-                LogHelper.Log(LogHelper.FRAMEWORK,$"{item}");
+                panel.ClosePanel();
+                Destroy(panel.panel); // 혹은 Destroy(panel.gameObject);
             }
-            foreach (var kv in PanelDic)
+            PanelDic.Remove(currentKey);
+            TypePanelStack.Pop();
+            
+            LogHelper.Log("UI Stack Count"+TypePanelStack.Count);
+            LogHelper.Log("UI DICT Count"+ PanelDic.Count);
+            if (TypePanelStack.Count > 0)
             {
-                LogHelper.Log(LogHelper.FRAMEWORK,($"{kv.Key} : {kv.Value}"));
+                var prevKey = TypePanelStack.Peek();
+                if (PanelDic.TryGetValue(prevKey, out var prevPanel))
+                {
+                    // 닫히고 나서 그 아래 있던 패널 갱신
+                    prevPanel.ReloadPanel();
+                    OnReLoadedPanel.OnNext(prevPanel);
+                }
             }
-            Destroy(panel.panel);
         }
 
         private PanelType GetKeybyinstanceID<T>(int instanceID) where T : Component, ICustomPanel
@@ -281,7 +356,6 @@ namespace Haare.Client.UI
             
             return matchingEntry.Key;
         }
-        
         private class PanelType
         {
             public readonly Type pageType;

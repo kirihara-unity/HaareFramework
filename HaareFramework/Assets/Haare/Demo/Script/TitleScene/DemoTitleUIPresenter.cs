@@ -9,7 +9,7 @@ using VContainer;
 using Haare.Client.Core.DI;
 using Haare.Client.Routine.Service.SceneService;
 using Haare.Client.UI;
-using Haare.Util.LogHelper;
+using Haare.Util.Logger;
 using Unity.VisualScripting;
 
 namespace Demo.TitleScene

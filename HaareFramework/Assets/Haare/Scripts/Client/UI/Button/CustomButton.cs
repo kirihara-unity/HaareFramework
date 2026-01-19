@@ -3,7 +3,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Haare.Client.Routine;
 using Haare.Scripts.Client.UI.Animator;
-using Haare.Util.LogHelper;
+using Haare.Util.Logger;
 using R3;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -42,13 +42,24 @@ namespace Haare.Client.UI
         [SerializeField] public float clickPunchScale = 0.3f;
         [SerializeField] public float clickDuration = 0.1f;
 
+        [Header("Settings")]
+        [SerializeField] private int cooldownMilliseconds = 500; // 0.5초 쿨타임
+
+        private bool _isLocked = false; 
         
         private UIAnimator _animator;
         
+        [Header("Disabled Settings")]
+        [SerializeField] private Color disabledColor = new Color(0.4f, 0.4f, 0.4f, 1f);
         public override UniTask Initialize(CancellationToken cts)
         {
             ButtonImage = GetComponentInChildren<CustomImage>();
             ButtonText = GetComponentInChildren<CustomText>();
+            
+            if (!INTERACTIABLE)
+            {
+                SetInteractable(false);
+            }
             if (OPTION_ANIMATION)
             {
                 _animator = new UIAnimator(
@@ -57,7 +68,38 @@ namespace Haare.Client.UI
             }
             return base.Initialize(cts);
         }
+        public void SetInteractable(bool isInteractable)
+        {
+            INTERACTIABLE = isInteractable;
 
+            if (ButtonImage == null) return;
+
+            if (!isInteractable)
+            {
+                // 비활성화 상태: 미리 설정된 어두운 색상(disabledColor) 적용
+                // CustomImage가 Graphic을 상속받았다면 .color 프로퍼티가 있을 것입니다.
+                ButtonImage.ChangeColor(disabledColor);
+            }
+            else
+            {
+                // 활성화 상태: 원래 상태로 복구
+                // CustomImage의 로직을 활용하여 기본 색상(CommonColor)으로 되돌립니다.
+                if (OPTION_HOVERALPHA)
+                {
+                    ButtonImage.ChangeCommonColor();
+                }
+                else
+                {
+                    ButtonImage.ChangeColor(Color.white);
+                }
+
+                // 이미지도 원래대로 복구 (HoverImage 옵션 사용 시)
+                if (OPTION_HOVERIMAGE)
+                {
+                    ButtonImage.ChangeCommonImage();
+                }
+            }
+        }
         public override UniTask Finalize()
         {
             if (OPTION_ANIMATION)
@@ -68,14 +110,14 @@ namespace Haare.Client.UI
         
         public void OnPointerClick(PointerEventData eventData)
         {
-            if(!INTERACTIABLE)
+            if (CheckAndStartCooldown(applyLockNow: true))
                 return;
             Onclicked.OnNext(Unit.Default);
 
         }
         public void OnPointerDown(PointerEventData eventData)
         {
-            if(!INTERACTIABLE)
+            if (CheckAndStartCooldown(applyLockNow: false))
                 return;
             if (OPTION_ANIMATION)
             { 
@@ -127,5 +169,25 @@ namespace Haare.Client.UI
             }
         }
 
+        
+        private bool CheckAndStartCooldown(bool applyLockNow = false)
+        {
+            if (!INTERACTIABLE || _isLocked) 
+                return true;
+            
+            if (applyLockNow)
+            {
+                CooldownRoutine().Forget();
+            }
+            return false; 
+        }
+        private async UniTaskVoid CooldownRoutine()
+        {
+            _isLocked = true;
+            //LogHelper.Log("Locked!");
+            await UniTask.Delay(cooldownMilliseconds, cancellationToken: this.GetCancellationTokenOnDestroy());
+            //LogHelper.Log("UN - Locked!");
+            _isLocked = false;
+        }
     }
 }

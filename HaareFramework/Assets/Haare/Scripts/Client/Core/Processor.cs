@@ -17,7 +17,7 @@ namespace Haare.Client.Core
 	/// <summary>
 	/// 모든 Routine들의 최종 관리자. 생애주기에 대한 관리가 이곳에서 진행됩니다.
 	/// </summary>
-    public class Processer : SingletonMonoBehaviour<Processer>
+    public class Processor : SingletonMonoBehaviour<Processor>
     {		
 	    public ReadOnlyReactiveProperty<bool> PROCESSING => processing;
 	    private ReactiveProperty<bool> processing = new ReactiveProperty<bool>();
@@ -66,7 +66,7 @@ namespace Haare.Client.Core
         } 
         
         /// <summary>
-        /// Processer의 event trigger에 맞춰서 구독중인 모든 Routine들이 함께 갱신됩니다
+        /// Processor의 event trigger에 맞춰서 구독중인 모든 Routine들이 함께 갱신됩니다
         /// 단 MonoRoutine은 별도의 타이밍으로 작동됩니다
         /// </summary>
         /// <param name="registerProcesses"></param>
@@ -114,7 +114,7 @@ namespace Haare.Client.Core
 			// {
 			// 	if (_ != SceneLoadPhase.Loading)
 			// 		return;
-			// 	Processer.Instance.CheckDeleteProcessesForScene().Forget();
+			// 	Processor.Instance.CheckDeleteProcessesForScene().Forget();
 			// });
 			await UniTask.Delay( 0 );
 			
@@ -136,7 +136,7 @@ namespace Haare.Client.Core
         }
         
         /// <summary>
-        /// Processer에 Routine을 등록합니다.
+        /// Processor에 Routine을 등록합니다.
         /// </summary>
         /// <param name="process"></param>
         public async UniTask Register( IRoutine process ,CancellationToken cts) {
@@ -151,7 +151,7 @@ namespace Haare.Client.Core
             }
         }
         /// <summary>
-        /// Processer에 Routine을 등록 해제합니다.
+        /// Processor에 Routine을 등록 해제합니다.
         /// </summary>
         /// <param name="process"></param>
         public void UnRegister( IRoutine process ) {
@@ -185,6 +185,23 @@ namespace Haare.Client.Core
 	        }
 	        await UniTask.WhenAll( tasks );
 	        DeleteProcessing = false;
+        }
+
+        private void OnApplicationQuit()
+        {
+	        foreach (var p in Routines)
+	        {
+		        if(p is INativeRoutine)
+			        ((INativeRoutine)p).OnApplicationQuit();
+	        }
+        }
+        private void OnApplicationPause(bool pauseStatus)
+        {
+	        foreach (var p in Routines)
+	        {
+		        if(p is INativeRoutine)
+			        ((INativeRoutine)p).OnApplicationPause(pauseStatus);
+	        }
         }
     }
 	

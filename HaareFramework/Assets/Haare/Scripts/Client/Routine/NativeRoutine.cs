@@ -7,7 +7,7 @@ using UnityEngine;
 
 
 using Haare.Client.Core;
-using Haare.Util.LogHelper;
+using Haare.Util.Logger;
 
 namespace Haare.Client.Routine
 {
@@ -37,8 +37,8 @@ namespace Haare.Client.Routine
             {
                 //LogHelper.LogTask(LogHelper.FRAMEWORK, "Custruct of Native Routine");
                 await UniTask.Delay(1, cancellationToken: cts);
-                await UniTask.WaitUntil(() => Processer.Instance.isInitialized, cancellationToken: cts);
-                await Processer.Instance.Register(this,cts);
+                await UniTask.WaitUntil(() => Processor.Instance.isInitialized, cancellationToken : cts);
+                await Processor.Instance.Register(this,cts);
             }
             catch (OperationCanceledException)
             {
@@ -60,7 +60,15 @@ namespace Haare.Client.Routine
         public virtual void UpdateProcess() {
 
         }
-        
+
+        public virtual void OnApplicationQuit()
+        {
+        }
+
+        public virtual void OnApplicationPause(bool pauseStatus)
+        {
+        }
+
         public void Dispose()
         {
             Finalize().Forget();

@@ -2,7 +2,7 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Haare.Client.Routine;
-using Haare.Util.LogHelper;
+using Haare.Util.Logger;
 using UnityEngine;
 
 namespace  Demo.TitleScene

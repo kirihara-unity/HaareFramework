@@ -9,7 +9,7 @@ using VContainer;
 
 using Haare.Client.Routine.Service.SceneService;
 using Haare.Client.UI;
-using Haare.Util.LogHelper;
+using Haare.Util.Logger;
 using Unity.VisualScripting;
 
 namespace Demo.LobbyScene
@@ -35,7 +35,7 @@ namespace Demo.LobbyScene
 
         public void PostInitialize()
         {
-            //StartSequence();
+            StartSequence();
         }
         
         private void BindIPanel(ICustomPanel panel)

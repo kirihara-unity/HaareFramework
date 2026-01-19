@@ -13,16 +13,35 @@ namespace Haare.Client.UI
         public GameObject panel { get; set; }
         
         public void OpenPanel() {}
-        public void ClosePanel() {}
+
+        public void ClosePanel()
+        { }
         public void ReloadPanel() {}
 
 
-        sealed async UniTask SetUpTask(Func<UniTask> setData = null, Func<UniTask> bindEvent = null)
+        sealed async UniTask SetUpTask(
+            Func<UniTask> setData = null, 
+            Action bindEvent = null)
         {
             if(setData!=null)
                 await setData();
             if(bindEvent!=null)
-                await bindEvent();
+                bindEvent();
+        }
+        sealed async UniTask SetUpTask(
+            Func<UniTask> setData = null,
+            Func<UniTask> setDataWithData = null, 
+            Func<UniTask> bindEventWithData = null, 
+            Action bindEvent = null)
+        {
+            if(setData!=null)
+                await setData();
+            if(setDataWithData!=null)
+                await setDataWithData();
+            if(bindEventWithData!=null)
+                await bindEventWithData();
+            if(bindEvent!=null)
+                bindEvent();
         }
         
         public void BindEvent() {}
@@ -34,6 +53,10 @@ namespace Haare.Client.UI
         { 
             await UniTask.CompletedTask;
         }
-
+        public virtual async UniTask SetData() 
+        { 
+            await UniTask.CompletedTask;
+        }
+        
     }
 }

@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 using Haare.Client.Core;
-using Haare.Util.LogHelper;
+using Haare.Util.Logger;
 
 namespace Haare.Client.Routine
 {
@@ -33,7 +33,7 @@ namespace Haare.Client.Routine
             _cts = CancellationTokenSource.CreateLinkedTokenSource(this.GetCancellationTokenOnDestroy());
             
             if (!isRegistered) { return; } 
-            //LogHelper.Log(LogHelper.DEMO,$"이거불러지는중?{this.GetType()}");
+    
             // 비동기 초기화 로직을 안전하게 호출
             InitializeAsync(_cts.Token).Forget();
         }
@@ -44,12 +44,12 @@ namespace Haare.Client.Routine
                 Constructor();
 
                 await UniTask.WaitUntil(
-                    () => Processer.Instance.isInitialized
+                    () => Processor.Instance.isInitialized
                     , cancellationToken : cts);
 
-                await Processer.Instance.Register(this,cts);
+                await Processor.Instance.Register(this,cts);
 
-                disposables.Add(Processer.Instance.PROCESSING.Subscribe(_ =>
+                Processor.Instance.PROCESSING.Subscribe(_ =>
                 {
                     if (_)
                     {
@@ -59,12 +59,12 @@ namespace Haare.Client.Routine
                     {
                         OnStopProcess();
                     }
-                }));
+                }).AddTo(disposables);;
 
 
-                disposables.Add(Processer.Instance.Onupdate.Subscribe(_ => { UpdateProcess(); }));
-                disposables.Add(Processer.Instance.OnLateupdate.Subscribe(_ => { LateUpdateProcess(); }));
-                disposables.Add(Processer.Instance.OnFixedupdate.Subscribe(_ => { FixedUpdateProcess(); }));
+                Processor.Instance.Onupdate.Subscribe(_ => { UpdateProcess(); }).AddTo(disposables);;
+                Processor.Instance.OnLateupdate.Subscribe(_ => { LateUpdateProcess(); }).AddTo(disposables);;
+                Processor.Instance.OnFixedupdate.Subscribe(_ => { FixedUpdateProcess(); }).AddTo(disposables);;
             }
             catch (OperationCanceledException exception)
             {
@@ -110,7 +110,7 @@ namespace Haare.Client.Routine
             _isFinalized = true;
             disposables.Clear();
             await Onfinalize();
-            //LogHelper.LogTask(LogHelper.FRAMEWORK,this.GetType()+"MonoRoutine Disposed");
+        
         }
         private void OnApplicationQuit()
         {
@@ -120,13 +120,11 @@ namespace Haare.Client.Routine
         {
             if (_isFinalized) return;
             
-            if (Processer.isCreated)
+            if (Processor.isCreated)
             {
-                Processer.Instance.UnRegister(this);
+                Processor.Instance.UnRegister(this);
             }
-            //LogHelper.Log(LogHelper.FRAMEWORK,this.GetType()+" Distroyed");
+            _cts.Cancel();
         }
-
- 
     }
 }

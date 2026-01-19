@@ -8,7 +8,7 @@ namespace Haare.Client.Routine
     {
         CancellationTokenSource _cts { get; }
 
-        //Processer Register?
+        //Processor Register?
         bool isRegistered	{ get; }
         //SceneOnly
         bool isInSceneOnly { get; }

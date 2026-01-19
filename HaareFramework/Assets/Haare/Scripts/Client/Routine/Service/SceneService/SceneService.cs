@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 using Demo.UI;
 using Haare.Client.UI;
 using Haare.Util.Loader;
-using Haare.Util.LogHelper;
+using Haare.Util.Logger;
 using R3;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -57,7 +57,7 @@ namespace Haare.Client.Routine.Service.SceneService
         public override async UniTask Initialize(CancellationToken cts)
         {
             await base.Initialize(cts);
-            LogHelper.LogTask(LogHelper.FRAMEWORK,"SceneRoutine Initialize");
+            LogHelper.LogTask(LogHelper.SERVICE,"SceneService Initialize");
             await UniTask.CompletedTask;
         }
         
@@ -77,29 +77,42 @@ namespace Haare.Client.Routine.Service.SceneService
         /// </summary>
         /// <param name="scene"></param>
         /// <param name="mode"></param>
-        public async void LoadScene()
+        public async UniTask LoadScene()
         {
             await LoadSceneInternal(LoadSceneRequest,true);
         }
-        
+        public async UniTask LoadScene(SceneName scene, LoadSceneMode mode = LoadSceneMode.Additive)
+        {
+            LoadSceneRequest = new SceneLoadRequest(scene,mode);
+            await LoadSceneInternal(LoadSceneRequest,false);
+        }
         /// <summary>
         /// Scene 이동의 공통처리
         /// </summary>
         /// <param name="request"></param>
         private async UniTask LoadSceneInternal(SceneLoadRequest request,bool withLoad)
         {
-            LogHelper.LogTask(LogHelper.FRAMEWORK,">>> Phase: StartLoad");
+            if(request == null)
+            {
+                // 1. 로그만 띄우고 넘어갈 경우 (LogHelper가 LogError를 지원한다고 가정)
+                LogHelper.Error(LogHelper.SERVICE, 
+                    $"[LoadSceneInternal] 목표 씬 정의되어 있지 않습니다.");
+            }
+
+            LogHelper.LogTask(LogHelper.SERVICE,">>> Phase: StartLoad");
+            LogHelper.LogTask(LogHelper.SERVICE,$"Load To : {request.Scene}");
             currentPhaseReactive.Value = SceneLoadPhase.StartLoad;
 
+            
             if(request.Mode==LoadSceneMode.Additive){
                 if (Enum.TryParse<SceneName>(SceneManager.GetActiveScene().name, out var initialScene))
                 {
                      sceneToUnload = initialScene;
+                     LogHelper.LogTask(LogHelper.SERVICE,$"sceneToUnload : {sceneToUnload}");
                 }
             }
-            
-            
-            LogHelper.LogTask(LogHelper.FRAMEWORK,">>> Phase: Loading");
+           
+            LogHelper.LogTask(LogHelper.SERVICE,">>> Phase: Loading");
             
             currentPhaseReactive.Value = SceneLoadPhase.Loading;
 
@@ -113,6 +126,7 @@ namespace Haare.Client.Routine.Service.SceneService
                 var minTimeTask = FakeLoadingProgressTask(1.5f);
                 await UniTask.WhenAll(loadSceneTask , minTimeTask);
                 await ExitLoadingSceneTask();
+                LogHelper.LogTask(LogHelper.SERVICE,">>> Loading with Load Task");
             }
             else
             {
@@ -121,11 +135,13 @@ namespace Haare.Client.Routine.Service.SceneService
             await UniTask.Delay(1000); // 1초 대기
             
             var sceneInstance = loadOperation.Result;
+            // 실제 켜지는거
             await sceneInstance.ActivateAsync();
             OnSceneLoadedHandler(sceneInstance.Scene, request.Argument);
             
             
-            LogHelper.LogTask(LogHelper.FRAMEWORK,">>> UnLoadCurrent Scene");
+            LogHelper.LogTask(LogHelper.SERVICE,">>> UnLoadCurrent Scene");
+            LogHelper.LogTask(LogHelper.SERVICE,$"sceneToUnload : {sceneToUnload}");
             
             if (request.Mode == LoadSceneMode.Additive && 
                 SceneManager.GetSceneByName(sceneToUnload.ToString()).isLoaded)
@@ -133,7 +149,7 @@ namespace Haare.Client.Routine.Service.SceneService
                 await SceneManager.UnloadSceneAsync(sceneToUnload.ToString());
             }
             
-            LogHelper.LogTask(LogHelper.FRAMEWORK,">>> Phase: EndLoad");
+            LogHelper.LogTask(LogHelper.SERVICE,">>> Phase: EndLoad");
             currentPhaseReactive.Value = SceneLoadPhase.EndLoad;
             
         }
@@ -142,6 +158,7 @@ namespace Haare.Client.Routine.Service.SceneService
         {
             var loadingPanelID = await _coreUIManager.LoadPanel<LoadingFadePanel>(null,false, true);
             var loadingPanel = _coreUIManager.RentPanel<LoadingFadePanel>(loadingPanelID);
+            loadingPanel.OpenPanel();
             await loadingPanel.FadeIn();
         }
         

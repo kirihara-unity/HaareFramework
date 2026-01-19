@@ -4,7 +4,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Haare.Client.Routine;
 using Haare.Client.UI;
-using Haare.Util.LogHelper;
+using Haare.Util.Logger;
 using TMPro;
 using UnityEngine;
 
@@ -12,7 +12,7 @@ public class FPSLogger : MonoRoutine
 {
     public override async UniTask Initialize(CancellationToken cts)
     {
-        LogHelper.Log(LogHelper.TASK,"FPSLogger Init");
+        LogHelper.LogTask(LogHelper.FRAMEWORK,"FPSLogger Init");
         base.isInSceneOnly = false;
         await base.Initialize(cts);
     }

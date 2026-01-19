@@ -1,7 +1,7 @@
 ﻿using Haare.Client.Routine;
 using Haare.Client.UI;
 using Haare.Scripts.Client.Data;
-using Haare.Util.LogHelper;
+using Haare.Util.Logger;
 using R3;
 using UnityEngine;
 

@@ -7,7 +7,7 @@ using VContainer.Unity;
 
 using Haare.Client.Routine.Service.SceneService;
 using Haare.Scripts.Client.Data;
-using Haare.Util.LogHelper;
+using Haare.Util.Logger;
 
 
 namespace Haare.Client.Core.DI
@@ -27,12 +27,12 @@ namespace Haare.Client.Core.DI
             _sceneService.CurrentPhase.AsObservable()
                 .Skip(1)
                 .Subscribe(_ =>
-            {
-                LogHelper.Log(LogHelper.FRAMEWORK,"Ended Loading"+_);
-                if (_ != SceneLoadPhase.EndLoad)
-                    return;
-                Processer.Instance.CheckDeleteProcessesForScene().Forget();
-                LogHelper.Log(LogHelper.FRAMEWORK,"Ended Clean Scene");
+                {
+                    LogHelper.Log(LogHelper.FRAMEWORK, $"Phase : {_}");
+                    if (_ != SceneLoadPhase.EndLoad)
+                        return;
+                    Processor.Instance.CheckDeleteProcessesForScene().Forget();
+                    LogHelper.Log(LogHelper.FRAMEWORK,"Ended Clean Scene");
             });
             LogHelper.Log(LogHelper.FRAMEWORK,"GamePresenter PostInitialize");
             
