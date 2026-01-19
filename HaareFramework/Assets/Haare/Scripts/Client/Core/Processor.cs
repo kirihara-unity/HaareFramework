@@ -141,7 +141,7 @@ namespace Haare.Client.Core
         /// <param name="process"></param>
         public async UniTask Register( IRoutine process ,CancellationToken cts) {
             if ( !Routines.Contains( process ) ) {
-	            //LogHelper.LogTask(LogHelper.FRAMEWORK,$"Registered : {process}");   
+	            LogHelper.LogTask(LogHelper.FRAMEWORK,$"Registered : {process}");   
 
 	            Routines.Add( process );	
                 
@@ -155,6 +155,8 @@ namespace Haare.Client.Core
         /// </summary>
         /// <param name="process"></param>
         public void UnRegister( IRoutine process ) {
+	        LogHelper.LogTask(LogHelper.FRAMEWORK,$"UnRegister : {process}");   
+
 	        deleteRoutines.Add( process );
         }
         

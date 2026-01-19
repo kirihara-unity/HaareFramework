@@ -135,6 +135,10 @@ namespace Haare.Client.Routine.Service.SceneService
             await UniTask.Delay(1000); // 1초 대기
             
             var sceneInstance = loadOperation.Result;
+            
+            LogHelper.LogTask(LogHelper.SERVICE,">>> Phase: EndLoad");
+            currentPhaseReactive.Value = SceneLoadPhase.EndLoad;
+
             // 실제 켜지는거
             await sceneInstance.ActivateAsync();
             OnSceneLoadedHandler(sceneInstance.Scene, request.Argument);
@@ -143,15 +147,12 @@ namespace Haare.Client.Routine.Service.SceneService
             LogHelper.LogTask(LogHelper.SERVICE,">>> UnLoadCurrent Scene");
             LogHelper.LogTask(LogHelper.SERVICE,$"sceneToUnload : {sceneToUnload}");
             
+            
             if (request.Mode == LoadSceneMode.Additive && 
                 SceneManager.GetSceneByName(sceneToUnload.ToString()).isLoaded)
             {
                 await SceneManager.UnloadSceneAsync(sceneToUnload.ToString());
             }
-            
-            LogHelper.LogTask(LogHelper.SERVICE,">>> Phase: EndLoad");
-            currentPhaseReactive.Value = SceneLoadPhase.EndLoad;
-            
         }
 
         private async UniTask ExitLoadingSceneTask()
