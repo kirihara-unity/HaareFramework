@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using R3;
 
@@ -10,7 +10,7 @@ using UnityEngine;
 
 using Haare.Client.Core.Singleton;
 using Haare.Client.Routine;
-using Haare.Util.LogHelper;
+using Haare.Util.Logger;
 
 namespace Haare.Client.Core
 {
@@ -47,14 +47,22 @@ namespace Haare.Client.Core
             Func<UniTask> registerProcesses 
             ) 
         {
-            
+	        processing.Value = processvalue;
+	        QualitySettings.vSyncCount = 0;
+
+			#if UNITY_IOS || UNITY_ANDROID
+			        Application.targetFrameRate = 120;
+			#elif UNITY_STANDALONE
+			        Application.targetFrameRate = 120;
+			#else
+			        Application.targetFrameRate = 60;
+			#endif
+	        
             await initializePlugin();				
             await RegisterEvents( registerProcesses );	
             base.Constructor();
-
-            await Initialize();
-            
-			LogHelper.Log(LogHelper.FRAMEWORK,"Finished Constructor");   
+            await Initialize(_cts.Token);
+			LogHelper.LogTask(LogHelper.FRAMEWORK,"Finished Constructor");   
         } 
         
         /// <summary>
@@ -64,11 +72,11 @@ namespace Haare.Client.Core
         /// <param name="registerProcesses"></param>
         private async UniTask RegisterEvents( Func<UniTask> registerProcesses ) {
 
-			Oninitialize += async () => {
+			Oninitialize += async (cts) => {
 				await registerProcesses();
-				foreach ( var p in Routines ) {
-					await p.Initialize();
-				}
+				// foreach ( var p in Routines ) {
+				// 	await p.Initialize(cts);
+				// }
 			};
 
 			Onupdate.Subscribe(
@@ -116,7 +124,7 @@ namespace Haare.Client.Core
         /// 현재의 Scene이 파기되고 Scene 종속적으로 생겨난 Routine들을 파기합니다
         /// </summary>
         public async UniTask CheckDeleteProcessesForScene() {
-	        LogHelper.Log(LogHelper.FRAMEWORK,"Checked DeleteProcessesForScene");   
+	        LogHelper.LogTask(LogHelper.FRAMEWORK,"Checked DeleteProcessesForScene");   
 	        
 	        foreach ( var p in Routines ) {
 		        if ( p.isInSceneOnly ) {
@@ -131,14 +139,14 @@ namespace Haare.Client.Core
         /// Processer에 Routine을 등록합니다.
         /// </summary>
         /// <param name="process"></param>
-        public async UniTask Register( IRoutine process ) {
+        public async UniTask Register( IRoutine process ,CancellationToken cts) {
             if ( !Routines.Contains( process ) ) {
-	            LogHelper.Log(LogHelper.FRAMEWORK,$"Registered : {process}");   
+	            //LogHelper.LogTask(LogHelper.FRAMEWORK,$"Registered : {process}");   
 
 	            Routines.Add( process );	
                 
                 if ( isInitialized ) {
-                    await process.Initialize();
+                    await process.Initialize(cts);
                 }
             }
         }

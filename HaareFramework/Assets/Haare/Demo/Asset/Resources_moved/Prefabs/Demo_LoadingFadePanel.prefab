@@ -106,3 +106,15 @@ MonoBehaviour:
   _image: {fileID: 0}
   CommonSprite: {fileID: 0}
   HoveredSprite: {fileID: 0}
+  ClickedSprite: {fileID: 0}
+  OPTION_ANIMATION: 0
+  ANIMATION_SLIDE: 0
+  slideDuration: 0.5
+  slideEaseType: 6
+  onScreenPosition: {fileID: 0}
+  offScreenPosition: {fileID: 0}
+  ANIMATION_POPUP: 0
+  popupDuration: 0.2
+  popupEaseType: 1
+  _hoverColor: {r: 0.85, g: 0.85, b: 0.85, a: 1}
+  _pressedColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}

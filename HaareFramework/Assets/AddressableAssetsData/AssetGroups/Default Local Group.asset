@@ -17,18 +17,6 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: c776f13c06aefd244b8ad9f61fb482a4
   m_SerializeEntries:
-  - m_GUID: ef5ec2efb91de2e4ba3361b59f3077fb
-    m_Address: Assets/Haare/Demo/Scene/LoadScene.unity
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-  - m_GUID: 9c587f5731acc834db9eca7616b3a621
-    m_Address: Assets/Haare/Demo/Scene/LobbyScene.unity
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-  - m_GUID: 2006f528c48ae9341b4c801ac58937b3
-    m_Address: Assets/Haare/Demo/Scene/TitleScene.unity
-    m_ReadOnly: 0
-    m_SerializedLabels: []
   - m_GUID: 63a365cf75622c14aa4f18de230fdedb
     m_Address: Prefabs/Demo_LoadingFadePanel
     m_ReadOnly: 0
@@ -55,6 +43,18 @@ MonoBehaviour:
     m_SerializedLabels: []
   - m_GUID: 472789d2898f45d44bf73393ce452afb
     m_Address: Prefabs/CoreCanvas
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 9c587f5731acc834db9eca7616b3a621
+    m_Address: Assets/Haare/Demo/Scene/DemoLobbyScene.unity
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 2006f528c48ae9341b4c801ac58937b3
+    m_Address: Assets/Haare/Demo/Scene/DemoTitleScene.unity
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: ef5ec2efb91de2e4ba3361b59f3077fb
+    m_Address: Assets/Haare/Demo/Scene/DemoLoadScene.unity
     m_ReadOnly: 0
     m_SerializedLabels: []
   m_ReadOnly: 0

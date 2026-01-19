@@ -13,8 +13,8 @@ namespace Demo.LobbyScene
         //protected override LifetimeScope Parent => FindObjectOfType<CoreLifetimeScope>();
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.RegisterComponentInHierarchy<LobbyUIManager>().As<SceneUIManager>().AsSelf();;
-            builder.RegisterEntryPoint<LobbyUIPresenter>();
+            builder.RegisterComponentInHierarchy<DemoLobbyUIManager>().As<SceneUIManager>().AsSelf();;
+            builder.RegisterEntryPoint<DemoLobbyUIPresenter>();
         }
     }
 }

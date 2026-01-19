@@ -12,10 +12,10 @@ namespace Demo.LoadScene
         //protected override LifetimeScope Parent => FindObjectOfType<CoreLifetimeScope>();
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.RegisterComponentInHierarchy<LoadUIManager>()
+            builder.RegisterComponentInHierarchy<DemoLoadUIManager>()
                 .As<SceneUIManager>().AsSelf();;
             builder.RegisterComponentInHierarchy<DemoLoadMono>();
-            builder.RegisterEntryPoint<LoadUIPresenter>();
+            builder.RegisterEntryPoint<DemoLoadUIPresenter>();
         }
     }
 }

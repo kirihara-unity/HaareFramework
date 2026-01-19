@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 using Haare.Client.Core;
-using Haare.Util.LogHelper;
+using Haare.Util.Logger;
 
 namespace Haare.Client.Routine
 {
@@ -13,10 +14,12 @@ namespace Haare.Client.Routine
     /// </summary>
     public class MonoRoutine : MonoBehaviour ,IRoutine
     {
+        public CancellationTokenSource _cts { get; private set; }
+        
         public virtual bool isRegistered => true;
-        public virtual bool isInSceneOnly { get; protected set; }
+        public virtual bool isInSceneOnly { get; protected set; } = true;
         public bool isInitialized { get; private set; }
-        public Func<UniTask> Oninitialize { get; protected set; } = async () => await UniTask.CompletedTask;
+        public Func<CancellationToken,UniTask> Oninitialize { get; protected set; } = async (cts) => await UniTask.CompletedTask;
         public Func<UniTask> Onfinalize { get; protected set;} = async () => await UniTask.CompletedTask;
         public Subject<Unit> Onupdate { get; protected set; } = new Subject<Unit>();
         public Subject<Unit> OnLateupdate { get; protected set; } = new Subject<Unit>();
@@ -25,46 +28,62 @@ namespace Haare.Client.Routine
         public CompositeDisposable disposables = new CompositeDisposable();
         private bool _isFinalized = false; 
 
-        protected async void Awake()
+        private void Awake()
         {
-            if ( !isRegistered ){ return; }	
-            Constructor();
-
-            await UniTask.WaitUntil( () => Processer.Instance.isInitialized);
-           
-            await Processer.Instance.Register(this);
-
-            disposables.Add(Processer.Instance.PROCESSING.Subscribe(_ =>
-            {
-                if (_)
-                {
-                    OnRestartProcess();
-                }
-                else
-                {
-                    OnStopProcess();
-                }
-            }));
-
+            _cts = CancellationTokenSource.CreateLinkedTokenSource(this.GetCancellationTokenOnDestroy());
             
-            disposables.Add(Processer.Instance.Onupdate.Subscribe( _ => {
-                UpdateProcess();
-            }));
-            disposables.Add(Processer.Instance.OnLateupdate.Subscribe( _ => {
-                LateUpdateProcess();
-            }));           
-            disposables.Add(Processer.Instance.OnFixedupdate.Subscribe( _ => {
-                FixedUpdateProcess();
-            }));
+            if (!isRegistered) { return; } 
+    
+            // 비동기 초기화 로직을 안전하게 호출
+            InitializeAsync(_cts.Token).Forget();
+        }
+        protected async UniTask InitializeAsync(CancellationToken cts)
+        {
+            try
+            {
+                Constructor();
+
+                await UniTask.WaitUntil(
+                    () => Processor.Instance.isInitialized
+                    , cancellationToken : cts);
+
+                await Processor.Instance.Register(this,cts);
+
+                Processor.Instance.PROCESSING.Subscribe(_ =>
+                {
+                    if (_)
+                    {
+                        OnRestartProcess();
+                    }
+                    else
+                    {
+                        OnStopProcess();
+                    }
+                }).AddTo(disposables);;
+
+
+                Processor.Instance.Onupdate.Subscribe(_ => { UpdateProcess(); }).AddTo(disposables);;
+                Processor.Instance.OnLateupdate.Subscribe(_ => { LateUpdateProcess(); }).AddTo(disposables);;
+                Processor.Instance.OnFixedupdate.Subscribe(_ => { FixedUpdateProcess(); }).AddTo(disposables);;
+            }
+            catch (OperationCanceledException exception)
+            {
+                LogHelper.Log(LogHelper.CANCELLED, 
+                    $"{this.GetType()} initialization was canceled. by {exception}");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Error(LogHelper.FRAMEWORK, $"An error occurred during {this.GetType()} initialization: {ex}");
+            }
         }
         
         
         protected virtual void Constructor() {
             
         }
-        public virtual async UniTask Initialize()
+        public virtual async UniTask Initialize(CancellationToken cts)
         {
-            await Oninitialize();
+            await Oninitialize(cts);
             isInitialized = true;
         }
         protected virtual void OnStopProcess()
@@ -91,7 +110,7 @@ namespace Haare.Client.Routine
             _isFinalized = true;
             disposables.Clear();
             await Onfinalize();
-            LogHelper.Log(LogHelper.FRAMEWORK,this.GetType()+" Disposed");
+        
         }
         private void OnApplicationQuit()
         {
@@ -101,13 +120,11 @@ namespace Haare.Client.Routine
         {
             if (_isFinalized) return;
             
-            if (Processer.isCreated)
+            if (Processor.isCreated)
             {
-                Processer.Instance.UnRegister(this);
+                Processor.Instance.UnRegister(this);
             }
-            LogHelper.Log(LogHelper.FRAMEWORK,this.GetType()+" Distroyed");
+            _cts.Cancel();
         }
-
- 
     }
 }

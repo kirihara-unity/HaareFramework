@@ -7,8 +7,7 @@ using UnityEngine.EventSystems;
 using Haare.Client.Core;
 using Haare.Client.Core.Singleton;
 using Haare.Client.UI;
-using Haare.Util.LogHelper;
-using Haare.Util.Prefab;
+using Haare.Util.Logger;
 
 public class HaareClient
 {
@@ -17,9 +16,9 @@ public class HaareClient
         
         LogHelper.Log(LogHelper.FRAMEWORK,"Start Haare Framework");
         await Task.Delay( 1 );
-        await Processer.WaitForCreation();
+        await Processor.WaitForCreation();
         
-        await Processer.Instance.Constructor(InitializePlugin, RegisterProcesses);
+        await Processor.Instance.Constructor(InitializePlugin, RegisterProcesses);
         
     }
 
@@ -31,7 +30,7 @@ public class HaareClient
 
     static async UniTask RegisterProcesses()
     {
-        LogHelper.Log(LogHelper.FRAMEWORK,"RegisterProcesses");
+        LogHelper.LogTask(LogHelper.FRAMEWORK,"RegisterProcesses");
         
         // 씬 전역에서 사용하는 object 
         var eventSystemObj = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
@@ -41,7 +40,7 @@ public class HaareClient
         Object.DontDestroyOnLoad(audioObj);
 
         
-        LogHelper.Log(LogHelper.FRAMEWORK,"RegisterProcesses -> end");
+        LogHelper.LogTask(LogHelper.FRAMEWORK,"RegisterProcesses -> end");
         await UniTask.CompletedTask;
     }
     

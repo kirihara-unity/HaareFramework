@@ -8,5 +8,7 @@ namespace Haare.Client.Routine
     {		
         Subject<Unit> Onupdate		{ get; }
         void UpdateProcess();
+        void OnApplicationQuit();
+        void OnApplicationPause(bool pauseStatus);
     }
 }

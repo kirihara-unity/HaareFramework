@@ -1,3 +1,4 @@
+using System.Threading;
 using Cysharp.Threading.Tasks;
 
 
@@ -8,9 +9,9 @@ namespace  Demo.LoadScene
  
     public class DemoLoadMono : MonoRoutine
     {
-        public override async UniTask Initialize()
+        public override async UniTask Initialize(CancellationToken cts)
         {
-            await base.Initialize();
+            await base.Initialize(cts);
         }
         
     }

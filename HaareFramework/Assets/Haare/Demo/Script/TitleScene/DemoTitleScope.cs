@@ -12,9 +12,9 @@ namespace Demo.TitleScene
         //protected override LifetimeScope Parent => FindObjectOfType<CoreLifetimeScope>();
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.RegisterComponentInHierarchy<TitleUIManager>().As<SceneUIManager>().AsSelf();;
+            builder.RegisterComponentInHierarchy<DemoTitleUIManager>().As<SceneUIManager>().AsSelf();;
             builder.RegisterComponentInHierarchy<DemoTitleMono>();
-            builder.RegisterEntryPoint<TitleUIPresenter>();
+            builder.RegisterEntryPoint<DemoTitleUIPresenter>();
         }
     }
 }
